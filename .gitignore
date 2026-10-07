@@ -1,0 +1,32 @@
+# Large binary artifacts — never commit these to git (exceeds GitHub's 100 MB
+# per-file limit). They are re-downloadable from the sources in README.md:
+#   vendor/OptiScaler-NR-v0.8.3-rtx40-mfg.zip  -> the fork's release page
+#   vendor/nvngx_dlssnr.dll                    -> ShortFuse's pinned RenoDX thread
+#
+# Options:
+#   1. Leave them untracked (this file). Re-download or scp them in to run.
+#   2. If you want them versioned, install Git LFS and track them instead:
+#        git lfs track "vendor/*.zip" "vendor/*.dll"
+#      then remove these entries and commit the .gitattributes.
+
+vendor/*.zip
+vendor/*.dll
+
+# Large binary artifacts — never commit these to git (exceeds GitHub's 100 MB
+# per-file limit). They are re-downloadable from the sources:
+#   vendor/v0.7.7/*            -> the fork's v0.7.7 release page
+#   runtimes/nvngx_dlssnr.dll  -> ShortFuse's pinned RenoDX thread (E67DEE20)
+# Options:
+#   1. Leave them untracked (this file). Re-download or scp them in to run.
+#   2. If you want them versioned, install Git LFS and track them instead:
+#        git lfs track "vendor/**/*.dll" "runtimes/*.dll"
+#      then remove these entries and commit the .gitattributes.
+
+# The whole v0.7.7 extract tree is binary (OptiScaler backends, nvfp4 models, runtime).
+# Keep the metadata/docs we author (apply/restore scripts, README notes) tracked,
+# but ignore the package payloads. To version the payloads, use Git LFS.
+vendor/v0.7.7/
+runtimes/
+
+# Temp / staging artifacts the apply script creates in the tool folder
+._staging_dlss5/

@@ -1,0 +1,2 @@
+aac7ea64d80604a5b79f686043ba28fbefefaf98818e861a377b78122cb24448  OptiScaler-NR-v0.8.3-rtx40-mfg.zip
+4b8d19bc3eff58a084f5eca7489c921501c203450169fb82ff4f649a4482ba05  nvngx_dlssnr.dll
