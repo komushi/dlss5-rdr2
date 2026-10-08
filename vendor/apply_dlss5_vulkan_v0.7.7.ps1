@@ -120,6 +120,7 @@ if (-not (Test-Path -LiteralPath $Ini)) { Fail "OptiScaler.ini not found after e
 $lines = Get-Content -LiteralPath $Ini
 $out = New-Object System.Collections.Generic.List[string]
 $section = ''
+$hotfixManualPollingFound = $false
 foreach ($ln in $lines) {
     $t = $ln.Trim()
     if ($t -match '^\[(.*)\]$') { $section = $Matches[1]; $out.Add($ln); continue }
@@ -137,7 +138,7 @@ foreach ($ln in $lines) {
     # In [Hotfix]: manual input polling. RDR2's WndProc chain stomps OptiScaler's
     # window-subclass hook ("subclass lost to another WndProc"), so no hotkey works.
     # Explicit polling keeps the F2 overlay key alive without the subclass.
-    if ($section -eq 'Hotfix' -and $ln -match '^ManualInputPolling=') { $out.Add('ManualInputPolling=true'); continue }
+    if ($section -eq 'Hotfix' -and $ln -match '^ManualInputPolling=') { $out.Add('ManualInputPolling=true'); $hotfixManualPollingFound = $true; continue }
 
     # In [DlssNr]: enable NR, run before SR, one pass, full working scale
     if ($section -eq 'DlssNr') {
@@ -151,7 +152,24 @@ foreach ($ln in $lines) {
 
     $out.Add($ln)
 }
+
+# If the [Hotfix] section never had a ManualInputPolling= line, the replace above
+# silently did nothing (the batch re-extracts the package each run, so the key can
+# go missing). Guarantee the F2 fix is present by inserting it right after the
+# [Hotfix] header; if no [Hotfix] section exists at all, append it at the end.
+if (-not $hotfixManualPollingFound) {
+    $hotfixIdx = -1
+    for ($i = 0; $i -lt $out.Count; $i++) { if ($out[$i] -match '^\[Hotfix\]') { $hotfixIdx = $i; break } }
+    if ($hotfixIdx -ge 0) {
+        $out.Insert($hotfixIdx + 1, 'ManualInputPolling=true')
+    } else {
+        $out.Add('')
+        $out.Add('[Hotfix]')
+        $out.Add('ManualInputPolling=true')
+    }
+}
 Set-Content -LiteralPath $Ini -Value $out
+Ok "Configured OptiScaler.ini (VulkanUpscaler=dlss, NR enabled, Passes=1, ManualInputPolling=true)"
 Ok "Configured OptiScaler.ini (VulkanUpscaler=dlss, NR enabled, Passes=1)"
 
 # --- 8. Verification summary -------------------------------------------
